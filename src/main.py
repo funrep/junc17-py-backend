@@ -24,12 +24,19 @@ def toplist():
         token = request.args.get('token')
         sp = spotipy.Spotify(auth=token)
         data = sp.current_user_top_tracks(limit=50)
+        track_id_list = []
         toplist = []
         for item in data['items']:
                 track_id = item['id']
-                features = sp.audio_features([track_id])
-                item['features'] = features
+
+                # features = sp.audio_features([track_id])
+                # item['features'] = features
+
+                track_id_list.append(track_id)
                 toplist.append(item)
+        features_list = sp.audio_features(track_id_list)
+        for i in range(0, len(data['items'])):
+                toplist[i]['features'] = features_list[i]
         return json.dumps(toplist)
 
 ### Autharization
