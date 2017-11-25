@@ -93,15 +93,36 @@ def host_party():
                         trackid_list.append(track['id'])
                 sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
 
+                playlists['party_id'] = {'pl_id': playlist_id, 'user_id': user_id}
+
                 tokens[token] = party_id
 
                 return json.dumps({'partyId': party_id})
         else:
                 return json.dumps({'partyId': tokens[token]})
 
+@app.route('/add_guest/<party_id>')
+def add_guest(party_id):
+        token = request.args.get('token')
+
+        toplist = get_toplist(token)
+        
+        sp = spotipy.Spotify(auth=token)
+        user_id = playlists[party_id]['user_id']
+        playlist_id = playlist[playlist_id]['pl_id']
+        tracks_sorted = mood(toplist)
+        trackid_list = []
+        for track in tracks_sorted:
+                trackid_list.append(track['id'])
+        sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
+        return 'Added guest to ' + party_id
+
+ 
 
 @app.route('/<party_id>/create')
 def create(party_id):
+        token = database[token]
+
         admin_token = database[party_id][0]
         sp = spotipy.Spotify(auth=admin_token)
         user_info = sp.current_user()
@@ -132,7 +153,7 @@ def update(party_id, guest_count):
 ### Autharization
 
 @app.route('/guest/<party_id>/<username>')
-def add_guest(party_id, username):
+def add_guest2(party_id, username):
         cache_path = None or ".cache-" + username
         token_info = sp_oauth.get_cached_token()
         if not token_info:
