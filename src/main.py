@@ -16,7 +16,7 @@ from hashids import Hashids
 app = Flask(__name__)
 CORS(app)
 
-clf = joblib.load('model.pkl')
+clf = joblib.load('src/model.pkl')
 
 appname = 'AppName'
 
@@ -152,7 +152,7 @@ def test():
                 "valence": 0.283
         }
 
-        return predict_track(sample)
+        return str(predict_track(sample))
 
 
 def predict_track(track):
@@ -178,6 +178,9 @@ def play(party_id):
         # return 'Success'
         return playlists[party_id]['pl_id'] 
 
-# @app.route('/mood/<level>')
-# def set_mood(level):
-#         # todo
+@app.route('/mood/<party_id>/<level>')
+def set_mood(party_id, level):
+        token = request.args.get('token')
+        sp = spotipy.Spotify(auth=token)
+        user_id = playlists[party_id]['user_id']
+        pl = sp.user_playlist()

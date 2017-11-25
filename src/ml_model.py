@@ -68,7 +68,7 @@ score = clf.score(X_eval, Y_eval)
 decided = clf.decision_function(X_eval)
 expected = Y_eval
 
-joblib.dump(clf, 'model.pkl')
+joblib.dump(clf, 'model.pkl', protocol=0)
 
 print("Samples: " + str(len(X_train)))
 
