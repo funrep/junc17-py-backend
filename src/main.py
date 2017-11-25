@@ -87,7 +87,8 @@ def host_party():
                 user_info = sp.current_user()
                 user_id = user_info['id']
                 playlist_info = sp.user_playlist_create(user_id, appname, public=False)
-                playlist_id = playlist_info['id']
+                #playlist_id = playlist_info['id']
+                playlist_id = '21uva5nvu7fn4vcyn7m55fabi:playlist:3XH0Ihw89NYErrImarnXpe'
                 tracks_sorted = mood(toplist)
                 trackid_list = []
                 for track in tracks_sorted:
