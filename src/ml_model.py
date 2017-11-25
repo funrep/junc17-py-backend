@@ -7,14 +7,13 @@ import json
   
 
 def convert_to_array(track):
-    time_signature = track["time_signature"]
     instrumentalness = track["instrumentalness"]
     acousticness = track["acousticness"]
     energy = track["energy"]
     danceability = track["danceability"]
     loudness = track["loudness"]
     return [energy, danceability, loudness, acousticness, 
-            instrumentalness, time_signature]
+            instrumentalness]
 
 
 def prepare_data_set(tracks):
@@ -23,7 +22,6 @@ def prepare_data_set(tracks):
         array.append(convert_to_array(track))
 
     final_array = np.array(array)    
-    normalized = sklearn.preprocessing.normalize(final_array, norm='l2')
 
     return final_array    
 
@@ -70,7 +68,7 @@ score = clf.score(X_eval, Y_eval)
 decided = clf.decision_function(X_eval)
 expected = Y_eval
 
-joblib.dump(clf, 'model.pkl')
+joblib.dump(clf, 'model.pkl', protocol=0)
 
 print("Samples: " + str(len(X_train)))
 
