@@ -117,34 +117,42 @@ def mood(tracks):
 
 tokens = {}
 
+party_ids = {}
+
 @app.route('/host_party')
 def host_party():
-        token = request.args.get('token')
-        if token not in tokens:
-                hashids = Hashids(salt=token)
-                party_id = hashids.encode(1, 2).upper();
-                database[party_id] = token
-                toplist = get_toplist(token)
-                db[party_id] = toplist
+    token = request.args.get('token')
+    sp = spotipy.Spotify(auth=token)
+    user_info = sp.current_user()
+    user_id = user_info['id']
 
-                sp = spotipy.Spotify(auth=token)
-                user_info = sp.current_user()
-                user_id = user_info['id']
-                playlist_info = sp.user_playlist_create(user_id, appname, public=False)
-                playlist_id = playlist_info['id']
-                tracks_sorted = mood(toplist)
-                for track in tracks_sorted:
-                        trackid_list.append(track['id'])
-                sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
+    if user_id not in party_ids:
+        # Create Party
+        hashids = Hashids(salt=token)
+        party_id = hashids.encode(1, 2).upper()
 
-                playlists[party_id] = {'pl_id': playlist_id, 'user_id': user_id, 'guests': []}
-                pp.pprint(playlists)
+        toplist = get_toplist(token)
+        db[party_id] = toplist
 
-                tokens[party_id] = token
+        playlist_info = sp.user_playlist_create(user_id, appname, public=False)
+        playlist_id = playlist_info['id']
+        tracks_sorted = mood(toplist)
+        trackid_list = []
+        for track in tracks_sorted:
+            trackid_list.append(track['id'])
+        sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
 
-                return json.dumps({'partyId': party_id})
-        else:
-                return json.dumps({'partyId': tokens[token]})
+        playlists[party_id] = {'pl_id': playlist_id, 'user_id': user_id, 'guests': []}
+        party_ids[user_id] = party_id
+        pp.pprint(playlists)
+
+    party_id = party_ids[user_id]
+    playlist_id = playlists[party_id]['pl_id']
+
+    tokens[party_id] = token
+
+    return json.dumps({'partyId': party_id, 'playlistId': playlist_id})
+
 
 @app.route('/join_party/<party_id>')
 def join_party(party_id):
