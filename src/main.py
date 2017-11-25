@@ -97,7 +97,7 @@ def host_party():
 
                 return json.dumps({'partyId': party_id})
         else:
-                return json.dumps({'partyId': party_id})
+                return json.dumps({'partyId': tokens[token]})
 
 
 @app.route('/<party_id>/create')
