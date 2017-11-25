@@ -17,6 +17,7 @@ def get_track_ids(fname):
 
 username = "alex@mcserver.se"
 track_ids = get_track_ids("club.json")
+track_ids_lounge = get_track_ids
  
 #Temp-fix cache bug
 try:
