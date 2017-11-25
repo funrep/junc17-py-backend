@@ -29,11 +29,10 @@ def prepare_data_set(tracks):
 norm_lounge = prepare_data_set(json.load(open('lounge_data.json')))
 norm_club = prepare_data_set(json.load(open('club_data.json')))
 
+X = np.concatenate((norm_lounge, norm_club), axis=0)
 
-X = list()
 Y = list()
-X.append(norm_lounge)
-X.append(norm_club)
+
 for i in range(0, len(norm_lounge)):
     Y.append(0)
 
@@ -44,7 +43,8 @@ for i in range(0, len(norm_club)):
 XY_shuffled = list(zip(X, Y))
 shuffle(XY_shuffled)
 
-print(XY_shuffled)
+
+
 samples_train = XY_shuffled[0: len(XY_shuffled) - 10]
 samples_eval = XY_shuffled[len(XY_shuffled) - 10: len(XY_shuffled)]
 
@@ -64,5 +64,7 @@ SGDClassifier(alpha=0.0001, average=False, class_weight=None, epsilon=0.1,
 
 predicted = clf.predict(X_eval)
 expected = Y_eval
+
+print(len(X_train))
 
 print(metrics.classification_report(expected, predicted))
