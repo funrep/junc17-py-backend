@@ -126,17 +126,17 @@ def join_party(party_id):
                 sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
                 return 'Success'
 
-@app.route('/play/<party_id>', methods=['GET','POST'])
+@app.route('/playlistid/<party_id>', methods=['GET','POST'])
 def play(party_id):
-        token = request.args.get('token')
-        sp = spotipy.Spotify(auth=token)
-        user_id = playlists[party_id]['user_id']
-        playlist_id = playlists[party_id]['pl_id']
-        context = 'spotify:' + user_id + ':spotify:playlist:' + playlist_id
-        pp.pprint(context)
-        sp.start_playback()
-        return 'Success'
- 
+        # token = request.args.get('token')
+        # sp = spotipy.Spotify(auth=token)
+        # user_id = playlists[party_id]['user_id']
+        # playlist_id = playlists[party_id]['pl_id']
+        # context = 'spotify:user:spotify:playlist:' + playlist_id
+        # sp.start_playback(context_uri=context)
+        # return 'Success'
+        return playlists[party_id]['pl_id'] 
+
 # @app.route('/mood/<level>')
 # def set_mood(level):
 #         # todo
