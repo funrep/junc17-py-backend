@@ -101,8 +101,8 @@ def host_party():
         else:
                 return json.dumps({'partyId': tokens[token]})
 
-@app.route('/add_guest/<party_id>')
-def add_guest(party_id):
+@app.route('/join_party/<party_id>')
+def join_party(party_id):
         token = request.args.get('token')
 
         toplist = get_toplist(token)
