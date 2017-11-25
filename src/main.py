@@ -70,27 +70,35 @@ def mood(tracks):
 # @app.route('/<party_id>/pause')
 # @app.route('/<party_id>/skip')
 
+tokens = {}
+
 @app.route('/host_party')
 def host_party():
         token = request.args.get('token')
-        hashids = Hashids(salt=token)
-        party_id = hashids.encode(1, 2);
-        database[party_id] = token
-        toplist = get_toplist(token)
-        playlists[party_id] = toplist
+        if token not in tokens:
+                hashids = Hashids(salt=token)
+                party_id = hashids.encode(1, 2).upper();
+                database[party_id] = token
+                toplist = get_toplist(token)
+                playlists[party_id] = toplist
 
-        sp = spotipy.Spotify(auth=token)
-        user_info = sp.current_user()
-        user_id = user_info['id']
-        playlist_info = sp.user_playlist_create(user_id, appname, public=False)
-        playlist_id = playlist_info['id']
-        tracks_sorted = mood(playlists[party_id])
-        trackid_list = []
-        for track in tracks_sorted:
-                trackid_list.append(track['id'])
-        sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
+                sp = spotipy.Spotify(auth=token)
+                user_info = sp.current_user()
+                user_id = user_info['id']
+                playlist_info = sp.user_playlist_create(user_id, appname, public=False)
+                playlist_id = playlist_info['id']
+                tracks_sorted = mood(playlists[party_id])
+                trackid_list = []
+                for track in tracks_sorted:
+                        trackid_list.append(track['id'])
+                sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
 
-        return json.dumps({'partyId': party_id})
+                tokens[token] = party_id
+
+                return json.dumps({'partyId': party_id})
+        else:
+                return json.dumps({'partyId': party_id})
+
 
 @app.route('/<party_id>/create')
 def create(party_id):
