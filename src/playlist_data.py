@@ -16,7 +16,6 @@ def get_track_ids(fname):
             #print(element['track']['id'])
             tracks.append(element['track']['id'])
 
-    print(tracks)
     return tracks
 
 username = "alex@mcserver.se"

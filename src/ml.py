@@ -9,10 +9,9 @@ import json
 
 def convert_to_array(track):
     energy = track["energy"]
-    tempo = track["tempo"]
     danceability = track["danceability"]
     loudness = track["loudness"]
-    return [energy, tempo, danceability, loudness]
+    return [energy, danceability, loudness]
 
 
 def prepare_data_set(tracks):
@@ -29,6 +28,9 @@ def prepare_data_set(tracks):
 norm_lounge = prepare_data_set(json.load(open('lounge_data.json')))
 norm_club = prepare_data_set(json.load(open('club_data.json')))
 
+print("Lounge: " + str(len(norm_lounge)))
+print("Club: " + str(len(norm_club)))
+
 X = np.concatenate((norm_lounge, norm_club), axis=0)
 
 Y = list()
@@ -43,10 +45,10 @@ for i in range(0, len(norm_club)):
 XY_shuffled = list(zip(X, Y))
 shuffle(XY_shuffled)
 
+samples_count = 100
 
-
-samples_train = XY_shuffled[0: len(XY_shuffled) - 10]
-samples_eval = XY_shuffled[len(XY_shuffled) - 10: len(XY_shuffled)]
+samples_train = XY_shuffled[0: len(XY_shuffled) - samples_count]
+samples_eval = XY_shuffled[len(XY_shuffled) - samples_count: len(XY_shuffled)]
 
 X_train = [x[0] for x in samples_train]
 X_eval = [x[0] for x in samples_eval]
@@ -63,8 +65,10 @@ SGDClassifier(alpha=0.0001, average=False, class_weight=None, epsilon=0.1,
               shuffle=True, tol=None, verbose=0, warm_start=False)
 
 predicted = clf.predict(X_eval)
+decided = clf.decision_function(X_eval)
 expected = Y_eval
 
-print(len(X_train))
+print("Samples: " + str(len(X_train)))
 
-print(metrics.classification_report(expected, predicted))
+print("Predicted: " + metrics.classification_report(expected, predicted))
+
