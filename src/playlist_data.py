@@ -16,7 +16,7 @@ def get_track_ids(fname):
     return tracks
 
 username = "alex@mcserver.se"
-track_ids = get_track_ids("club.json")
+track_ids = get_track_ids("lounge.json")
 track_ids_lounge = get_track_ids
  
 #Temp-fix cache bug
@@ -32,9 +32,10 @@ if token:
     sp = spotipy.Spotify(auth=token)
 
     tracks_features = sp.audio_features(track_ids)
+
     filedata = json.dumps(tracks_features)
 
-    f = open('data.json', 'w')
+    f = open('lounge_data.json', 'w')
     f.write(filedata)
 else:
         print ("Can't get token")
