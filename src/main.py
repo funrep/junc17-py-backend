@@ -1,6 +1,7 @@
 from flask import Flask, redirect, json
 from flask import request
 from flask_cors import CORS, cross_origin
+from sklearn.externals import joblib
 
 import os
 import pprint
@@ -14,6 +15,8 @@ from hashids import Hashids
 
 app = Flask(__name__)
 CORS(app)
+
+clf = joblib.load('model.pkl')
 
 appname = 'AppName'
 
@@ -125,6 +128,44 @@ def join_party(party_id):
 
                 sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
                 return 'Success'
+
+@app.route('/test')
+def test():
+        sample = {
+                "acousticness": 0.0861,
+                "analysis_url": "https://api.spotify.com/v1/audio-analysis/1JI70l1lE5IF2tgJm5TnMD",
+                "danceability": 0.509,
+                "duration_ms": 162440,
+                "energy": 0.897,
+                "id": "1JI70l1lE5IF2tgJm5TnMD",
+                "instrumentalness": 0.000634,
+                "key": 8,
+                "liveness": 0.0625,
+                "loudness": -3.418,
+                "mode": 0,
+                "speechiness": 0.0454,
+                "tempo": 149.864,
+                "time_signature": 4,
+                "track_href": "https://api.spotify.com/v1/tracks/1JI70l1lE5IF2tgJm5TnMD",
+                "type": "audio_features",
+                "uri": "spotify:track:1JI70l1lE5IF2tgJm5TnMD",
+                "valence": 0.283
+        }
+
+        return predict_track(sample)
+
+
+def predict_track(track):
+        instrumentalness = track["instrumentalness"]
+        acousticness = track["acousticness"]
+        energy = track["energy"]
+        danceability = track["danceability"]
+        loudness = track["loudness"]
+        res = clf.predict_proba([[energy, danceability, loudness, acousticness,
+                                  instrumentalness]])
+        score = round(res[0][0] * 100)
+        return score
+
 
  
 # @app.route('/mood/<level>')
