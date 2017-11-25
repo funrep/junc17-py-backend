@@ -114,8 +114,7 @@ def join_party(party_id):
         trackid_list = []
         for track in tracks_sorted:
                 trackid_list.append(track['id'])
-        sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
-        return 'Added guest to ' + party_id
+        return json.dumps(trackid_list)
 
  
 
