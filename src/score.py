@@ -120,9 +120,10 @@ mean_energy = 0.5
 
 
 importance_danceability = 1 / mood
-importance_loudness = 0.1
+importance_loudness = 0.5
 importance_tempo = 1 / mood
 importance_energy = 1 / mood
+importance_popularity = 0.1
 
 
 guest_playlist = track_count_sorted_list
