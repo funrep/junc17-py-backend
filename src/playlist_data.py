@@ -19,7 +19,7 @@ def get_track_ids(fname):
     return tracks
 
 username = "alex@mcserver.se"
-track_ids = get_track_ids(current_file + ".json")
+track_ids = get_track_ids("data/" + current_file + ".json")
 track_ids_lounge = get_track_ids
  
 #Temp-fix cache bug
@@ -42,7 +42,7 @@ if token:
 
     filedata = json.dumps(tracks_features)
 
-    f = open(current_file + '_data.json', 'w')
+    f = open("data/" + current_file + '_data.json', 'w')
     f.write(filedata)
     print("Saved file!")
 else:

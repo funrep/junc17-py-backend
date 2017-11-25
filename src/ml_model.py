@@ -1,17 +1,20 @@
 import numpy as np
 import sklearn
-from sklearn.preprocessing import Normalizer
-from sklearn.linear_model import SGDClassifier
-from sklearn import metrics
+from sklearn import svm
+from sklearn.externals import joblib
 from random import shuffle
 import json
   
 
 def convert_to_array(track):
+    time_signature = track["time_signature"]
+    instrumentalness = track["instrumentalness"]
+    acousticness = track["acousticness"]
     energy = track["energy"]
     danceability = track["danceability"]
     loudness = track["loudness"]
-    return [energy, danceability, loudness]
+    return [energy, danceability, loudness, acousticness, 
+            instrumentalness, time_signature]
 
 
 def prepare_data_set(tracks):
@@ -22,24 +25,24 @@ def prepare_data_set(tracks):
     final_array = np.array(array)    
     normalized = sklearn.preprocessing.normalize(final_array, norm='l2')
 
-    return normalized    
+    return final_array    
 
 
-norm_lounge = prepare_data_set(json.load(open('lounge_data.json')))
-norm_club = prepare_data_set(json.load(open('club_data.json')))
+norm_lounge = prepare_data_set(json.load(open('data/lounge_data.json')))
+norm_club = prepare_data_set(json.load(open('data/club_data.json')))
 
-print("Lounge: " + str(len(norm_lounge)))
-print("Club: " + str(len(norm_club)))
+print("Amount of Lounge tracks: " + str(len(norm_lounge)))
+print("Amount of Club tracks: " + str(len(norm_club)))
 
 X = np.concatenate((norm_lounge, norm_club), axis=0)
 
 Y = list()
 
 for i in range(0, len(norm_lounge)):
-    Y.append(0)
+    Y.append('lounge')
 
 for i in range(0, len(norm_club)):
-    Y.append(1)
+    Y.append('club')
 
 
 XY_shuffled = list(zip(X, Y))
@@ -56,19 +59,20 @@ Y_train = [x[1] for x in samples_train]
 Y_eval = [x[1] for x in samples_eval]
 
 
-clf = SGDClassifier(loss="hinge", penalty="l2")
+clf = svm.SVC(C=1.0, cache_size=200, class_weight="balanced", coef0=0.0,
+              decision_function_shape='ovo', degree=3, gamma='auto', kernel='rbf',
+              max_iter=-1, probability=True, random_state=None, shrinking=True,
+              tol=0.001, verbose=False)
 clf.fit(X_train, Y_train)
-SGDClassifier(alpha=0.0001, average=False, class_weight=None, epsilon=0.1,
-              eta0=0.0, fit_intercept=True, l1_ratio=0.15,
-              learning_rate='optimal', loss='hinge', max_iter=4, n_iter=None,
-              n_jobs=1, penalty='l2', power_t=0.5, random_state=None,
-              shuffle=True, tol=None, verbose=0, warm_start=False)
 
-predicted = clf.predict(X_eval)
+predicted = clf.predict_proba(X_eval)
+score = clf.score(X_eval, Y_eval)
 decided = clf.decision_function(X_eval)
 expected = Y_eval
 
+joblib.dump(clf, 'model.pkl')
+
 print("Samples: " + str(len(X_train)))
 
-print("Predicted: " + metrics.classification_report(expected, predicted))
+print(score)
 
