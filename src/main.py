@@ -3,6 +3,8 @@ from flask import request
 from flask_cors import CORS, cross_origin
 
 import os
+import pprint
+pp = pprint.PrettyPrinter()
 # import json
 
 import spotipy
@@ -80,22 +82,22 @@ def host_party():
                 party_id = hashids.encode(1, 2).upper();
                 database[party_id] = token
                 toplist = get_toplist(token)
-                playlists[party_id] = toplist
 
                 sp = spotipy.Spotify(auth=token)
                 user_info = sp.current_user()
                 user_id = user_info['id']
                 playlist_info = sp.user_playlist_create(user_id, appname, public=False)
                 playlist_id = playlist_info['id']
-                tracks_sorted = mood(playlists[party_id])
+                tracks_sorted = mood(toplist)
                 trackid_list = []
                 for track in tracks_sorted:
                         trackid_list.append(track['id'])
                 sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
 
-                playlists['party_id'] = {'pl_id': playlist_id, 'user_id': user_id}
+                playlists[party_id] = {'pl_id': playlist_id, 'user_id': user_id}
+                pp.pprint(playlists)
 
-                tokens[token] = party_id
+                tokens[party_id] = token
 
                 return json.dumps({'partyId': party_id})
         else:
@@ -106,11 +108,15 @@ def join_party(party_id):
         token = request.args.get('token')
 
         toplist = get_toplist(token)
+
+        print party_id
+        for s in tokens:
+                print s
         
         admin_token = tokens[party_id]
         sp = spotipy.Spotify(auth=admin_token)
         user_id = playlists[party_id]['user_id']
-        playlist_id = playlist[playlist_id]['pl_id']
+        playlist_id = playlists[party_id]['pl_id']
         tracks_sorted = mood(toplist)
         trackid_list = []
         for track in tracks_sorted:
