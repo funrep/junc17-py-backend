@@ -107,14 +107,17 @@ def join_party(party_id):
 
         toplist = get_toplist(token)
         
-        sp = spotipy.Spotify(auth=token)
+        admin_token = tokens[party_id]
+        sp = spotipy.Spotify(auth=admin_token)
         user_id = playlists[party_id]['user_id']
         playlist_id = playlist[playlist_id]['pl_id']
         tracks_sorted = mood(toplist)
         trackid_list = []
         for track in tracks_sorted:
                 trackid_list.append(track['id'])
-        return json.dumps(trackid_list)
+
+        sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
+        return 'Success'
 
  
 
