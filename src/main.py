@@ -20,7 +20,7 @@ appname = 'AppName'
 client_id = os.environ['SPOTIPY_CLIENT_ID']
 client_secret = os.environ['SPOTIPY_CLIENT_SECRET']
 redirect_uri = 'http://127.0.0.1:5000/admin/callback'
-scope = 'user-read-private user-top-read playlist-modify-private'
+scope = 'user-read-private user-top-read playlist-modify-private user-modify-playback-state'
 
 sp_oauth = oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri, 
                                 scope=scope, cache_path=None)
@@ -126,6 +126,16 @@ def join_party(party_id):
                 sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
                 return 'Success'
 
+@app.route('/play/<party_id>', methods=['GET','POST'])
+def play(party_id):
+        token = request.args.get('token')
+        sp = spotipy.Spotify(auth=token)
+        user_id = playlists[party_id]['user_id']
+        playlist_id = playlists[party_id]['pl_id']
+        context = 'spotify:' + user_id + ':spotify:playlist:' + playlist_id
+        pp.pprint(context)
+        sp.start_playback()
+        return 'Success'
  
 # @app.route('/mood/<level>')
 # def set_mood(level):
