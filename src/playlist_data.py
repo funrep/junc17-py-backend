@@ -1,19 +1,41 @@
 import spotipy
+import spotipy.util as util
 import json
 
-token = util.prompt_for_user_token(username, scope)
-track_ids = None # json.loads(FILE HERE)
+import os
+from json.decoder import JSONDecodeError
+
+
+def get_track_ids(fname):
+    tracks = list()
+    data = json.load(open(fname))
+    for element in data[0]['items']:
+        #print(element['track']['id'])
+        tracks.append(element['track']['id'])
+
+    return tracks
+
+username = "alex@mcserver.se"
+track_ids = get_track_ids("lounge.json")
+track_ids_lounge = get_track_ids
+ 
+#Temp-fix cache bug
+try:
+    token = util.prompt_for_user_token(username)
+except(AttributeError, JSONDecodeError):
+    os.remove(f".cache-{username}")
+    token = util.prompt_for_user_token(username)
+
+
 
 if token:
     sp = spotipy.Spotify(auth=token)
-    song_list = []
-    for track_id in track_ids:
-        track_info = sp.track(track_id)
-        track_features = sp.audio_features(track_id)
-        track = { 'id': track_id, 'info': track_info, 'features': track_features }
-        song_list.append(track)
-    filedata = json.dumps(song_list)
-    f = open('filename', 'w')
+
+    tracks_features = sp.audio_features(track_ids)
+
+    filedata = json.dumps(tracks_features)
+
+    f = open('lounge_data.json', 'w')
     f.write(filedata)
 else:
-        print "Can't get token for", username
+        print ("Can't get token")
