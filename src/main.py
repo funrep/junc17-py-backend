@@ -94,7 +94,7 @@ def host_party():
                         trackid_list.append(track['id'])
                 sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
 
-                playlists[party_id] = {'pl_id': playlist_id, 'user_id': user_id}
+                playlists[party_id] = {'pl_id': playlist_id, 'user_id': user_id, 'guests': []}
                 pp.pprint(playlists)
 
                 tokens[party_id] = token
@@ -107,115 +107,26 @@ def host_party():
 def join_party(party_id):
         token = request.args.get('token')
 
-        toplist = get_toplist(token)
+        if token in playlists[party_id]['guests']:
+                return 'Already in party'
+        else:
+                toplist = get_toplist(token)
 
-        print party_id
-        for s in tokens:
-                print s
-        
-        admin_token = tokens[party_id]
-        sp = spotipy.Spotify(auth=admin_token)
-        user_id = playlists[party_id]['user_id']
-        playlist_id = playlists[party_id]['pl_id']
-        tracks_sorted = mood(toplist)
-        trackid_list = []
-        for track in tracks_sorted:
-                trackid_list.append(track['id'])
+                playlists[party_id]['guests'].append(token)
 
-        sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
-        return 'Success'
+                admin_token = tokens[party_id]
+                sp = spotipy.Spotify(auth=admin_token)
+                user_id = playlists[party_id]['user_id']
+                playlist_id = playlists[party_id]['pl_id']
+                tracks_sorted = mood(toplist)
+                trackid_list = []
+                for track in tracks_sorted:
+                        trackid_list.append(track['id'])
+
+                sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
+                return 'Success'
 
  
-
-@app.route('/<party_id>/create')
-def create(party_id):
-        token = database[token]
-
-        admin_token = database[party_id][0]
-        sp = spotipy.Spotify(auth=admin_token)
-        user_info = sp.current_user()
-        user_id = user_info['id']
-        playlist_info = user_playlist_create(user_id, 'temp', public=False)
-        playlist_id = playlist_info['id']
-        tracks_sorted = mood(playlists[party_id])
-        trackid_list = []
-        for track in tracks_sorted:
-                trackid_list.append(track['id'])
-        sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
-
-@app.route('/update/<party_id>/<guest_count>')
-def update(party_id, guest_count):
-        guest_tokens = database[party_id]
-        curr_guest_count = len(guest_tokens)
-        if curr_guest_count > guest_count:
-                # new guests
-                # retrieve playlists
-                toplists = []
-                for i in range(guest_count, curr_guest_count):
-                        toplist = get_toplist(guest_tokens[i])
-                        toplists.append(toplist)
-                return json.dumps[toplists]
-        else:
-                return json.dumps([])
-
-### Autharization
-
-@app.route('/guest/<party_id>/<username>')
-def add_guest2(party_id, username):
-        cache_path = None or ".cache-" + username
-        token_info = sp_oauth.get_cached_token()
-        if not token_info:
-                auth_url = sp_oauth.get_authorize_url()
-                return redirect(auth_url)
-        else:
-                database[party_id] = token_info['access_token']
-                toplist = get_toplist[token_info['access_token']]
-                playlists[party_id].extend(toplist)
-                return 'Successfully connected to ' + party_id + '.'
-
-@app.route('/guest/callback')
-def guest_callback():
-        code = request.args.get('code')
-        token_info = sp_oauth.get_access_token(code)
-        database[party_id] = token_info['access_token']
-        toplist = get_toplist[token_info['access_token']]
-        playlists[party_id].extend(toplist)
-        return 'Successfully connected to ' + party_id + '.'
-
-@app.route('/admin/<username>')
-def auth(username):
-        cache_path = None or ".cache-" + username
-        token_info = sp_oauth.get_cached_token()
-        if not token_info:
-                auth_url = sp_oauth.get_authorize_url()
-                return redirect(auth_url)
-        else:
-                hashids = Hashids(salt=token_info['access_token'])
-                party_id = hashids.encode(1, 2);
-                database[party_id] = [token_info['access_token']]
-                toplist = get_toplist[token_info['access_token']]
-                playlists[party_id] = toplist
-                return party_id
-
-@app.route('/admin/callback')
-def auth_callback():
-        code = request.args.get('code')
-        token_info = sp_oauth.get_access_token(code)
-        hashids = Hashids(salt=token_info['access_token'])
-        party_id = hashids.encode(1, 2);
-        database[party_id] = [token_info['access_token']]
-        toplist = get_toplist(token_info['access_token'])
-        playlists[party_id] = toplist
-
-        sp = spotipy.Spotify(auth=token_info['access_token'])
-        user_info = sp.current_user()
-        user_id = user_info['id']
-        playlist_info = sp.user_playlist_create(user_id, appname, public=False)
-        playlist_id = playlist_info['id']
-        tracks_sorted = mood(playlists[party_id])
-        trackid_list = []
-        for track in tracks_sorted:
-                trackid_list.append(track['id'])
-        sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
-
-        return party_id
+# @app.route('/mood/<level>')
+# def set_mood(level):
+#         # todo
