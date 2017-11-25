@@ -36,7 +36,47 @@ database = {}
 # party_id -> [track_ids]
 playlists = {}
 
+db = {}
+
 ### Spotify helper functions
+
+
+def mod_playlist(party_id, user_id, pl_id, token, mood):
+        # remove tracks
+        data = sp.user_playlist(user=user_id, playlist_id=pl_id)
+        track_ids = []
+        for item in data['items']:
+                track_ids.append(item['id'])
+        sp.user_playlist_remove_specific_occurrences_of_tracks(user_id, pl_id, track_ids)
+
+        # sort
+        all_tracks = db[party_id]
+        for track in all_tracks:
+                score = predict_track(track)
+                track['mood'] = abs(score - mood)
+        
+        result = sorted(all_tracks, key=lambda x: x['mood'])
+
+        trackids = []
+        for track in resut[:50]:
+                trackids.append(track['id'])
+
+        sp.user_playlist_add_tracks(user_id, pl_id, trackids)
+
+
+def predict_track(track):
+        instrumentalness = track["instrumentalness"]
+        acousticness = track["acousticness"]
+        energy = track["energy"]
+        danceability = track["danceability"]
+        loudness = track["loudness"]
+        res = clf.predict_proba([[energy, danceability, loudness, acousticness,
+                                  instrumentalness]])
+        score = round(res[0][0] * 100)
+        return score
+
+
+
 
 def get_toplist(token):
         sp = spotipy.Spotify(auth=token)
@@ -85,15 +125,14 @@ def host_party():
                 party_id = hashids.encode(1, 2).upper();
                 database[party_id] = token
                 toplist = get_toplist(token)
+                db[party_id] = toplist
 
                 sp = spotipy.Spotify(auth=token)
                 user_info = sp.current_user()
                 user_id = user_info['id']
                 playlist_info = sp.user_playlist_create(user_id, appname, public=False)
-                #playlist_id = playlist_info['id']
-                playlist_id = '21uva5nvu7fn4vcyn7m55fabi:playlist:3XH0Ihw89NYErrImarnXpe'
+                playlist_id = playlist_info['id']
                 tracks_sorted = mood(toplist)
-                trackid_list = []
                 for track in tracks_sorted:
                         trackid_list.append(track['id'])
                 sp.user_playlist_add_tracks(user_id, playlist_id, trackid_list)
@@ -115,6 +154,7 @@ def join_party(party_id):
                 return 'Already in party'
         else:
                 toplist = get_toplist(token)
+                db[party_id] = toplist
 
                 playlists[party_id]['guests'].append(token)
 
@@ -154,18 +194,6 @@ def test():
         }
 
         return str(predict_track(sample))
-
-
-def predict_track(track):
-        instrumentalness = track["instrumentalness"]
-        acousticness = track["acousticness"]
-        energy = track["energy"]
-        danceability = track["danceability"]
-        loudness = track["loudness"]
-        res = clf.predict_proba([[energy, danceability, loudness, acousticness,
-                                  instrumentalness]])
-        score = round(res[0][0] * 100)
-        return score
 
 
 @app.route('/playlistid/<party_id>', methods=['GET','POST'])
