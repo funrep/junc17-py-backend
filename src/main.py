@@ -47,14 +47,14 @@ def mod_playlist(party_id, user_id, pl_id, token, mood):
         # remove tracks
         data = sp.user_playlist(user=user_id, playlist_id=pl_id)
         track_ids = []
-        for item in data['items']:
-                track_ids.append(item['id'])
-        sp.user_playlist_remove_specific_occurrences_of_tracks(user_id, pl_id, track_ids)
+        for item in data['tracks']['items']:
+                track_ids.append(item['track']['id'])
+        sp.user_playlist_remove_all_occurrences_of_tracks(user_id, pl_id, track_ids)
 
         # sort
         all_tracks = db[party_id]
         for track in all_tracks:
-                score = predict_track(track)
+                score = predict_track(track['features'])
                 track['mood'] = abs(score - mood)
         
         result = sorted(all_tracks, key=lambda x: x['mood'])
@@ -164,7 +164,7 @@ def join_party(party_id):
                 return 'Already in party'
         else:
                 toplist = get_toplist(token)
-                db[party_id] = toplist
+                db[party_id].extend(toplist)
 
                 playlists[party_id]['guests'].append(token)
 
@@ -221,7 +221,7 @@ def play(party_id):
 def set_mood():
         token = request.args.get('token')
         party_id = request.args.get('partyId')
-        moodLevel = request.args.get('mood')
+        moodLevel = int(request.args.get('mood'))
         user_id = playlists[party_id]['user_id']
         pl_id = playlists[party_id]['pl_id']
         mod_playlist(party_id, user_id, pl_id, token, moodLevel)
