@@ -215,9 +215,12 @@ def play(party_id):
         # return 'Success'
         return playlists[party_id]['pl_id'] 
 
-@app.route('/mood/<party_id>/<level>')
+@app.route('/mood')
 def set_mood(party_id, level):
         token = request.args.get('token')
-        sp = spotipy.Spotify(auth=token)
+        party_id = request.args.get('partyId')
+        moodLevel = request.args.get('mood')
         user_id = playlists[party_id]['user_id']
-        pl = sp.user_playlist()
+        pl_id = playlists[party_id]['pl_id']
+        mod_playlist(party_id, user_id, pl_id, token, moodLevel)
+        return 'Hopefully worked'
