@@ -18,7 +18,7 @@ CORS(app)
 
 clf = joblib.load('src/model.pkl')
 
-appname = 'AppName'
+appname = 'Partify'
 
 client_id = 'a9b4c32e2d98436fbf23777eafc3a300'
 client_secret = 'e5c0394b9d0c4dfbb2f4c787fbf6fd1b'
@@ -136,7 +136,8 @@ def host_party():
         toplist = get_toplist(token)
         db[party_id] = toplist
 
-        playlist_info = sp.user_playlist_create(user_id, appname, public=False)
+        playlist_name = appname + '-' + party_id
+        playlist_info = sp.user_playlist_create(user_id, playlist_name, public=False)
         playlist_id = playlist_info['id']
         tracks_sorted = mood(toplist)
         trackid_list = []
