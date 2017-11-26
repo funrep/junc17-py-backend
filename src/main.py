@@ -60,7 +60,7 @@ def mod_playlist(party_id, user_id, pl_id, token, mood):
         result = sorted(all_tracks, key=lambda x: x['mood'])
 
         trackids = []
-        for track in resut[:50]:
+        for track in result[:50]:
                 trackids.append(track['id'])
 
         sp.user_playlist_add_tracks(user_id, pl_id, trackids)
