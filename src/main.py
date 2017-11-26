@@ -20,8 +20,8 @@ clf = joblib.load('src/model.pkl')
 
 appname = 'AppName'
 
-client_id = os.environ['SPOTIPY_CLIENT_ID']
-client_secret = os.environ['SPOTIPY_CLIENT_SECRET']
+client_id = 'a9b4c32e2d98436fbf23777eafc3a300'
+client_secret = 'e5c0394b9d0c4dfbb2f4c787fbf6fd1b'
 redirect_uri = 'http://127.0.0.1:5000/admin/callback'
 scope = 'user-read-private user-top-read playlist-modify-private user-modify-playback-state'
 
@@ -155,6 +155,13 @@ def host_party():
 
     return json.dumps({'partyId': party_id, 'playlistId': playlist_id})
 
+@app.route('/usercount')
+def usercount():
+    party_id = request.args.get('partyId')
+    guests = playlists[party_id]['guests']
+    return json.dumps({'userCount': len(guests)})
+
+### Todo get each user's info
 
 @app.route('/join_party/<party_id>')
 def join_party(party_id):

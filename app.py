@@ -16,7 +16,7 @@ from hashids import Hashids
 app = Flask(__name__)
 CORS(app)
 
-clf = joblib.load('model.pkl')
+clf = joblib.load('src/model.pkl')
 
 appname = 'AppName'
 
@@ -155,6 +155,13 @@ def host_party():
 
     return json.dumps({'partyId': party_id, 'playlistId': playlist_id})
 
+@app.route('/usercount')
+def usercount():
+    party_id = request.args.get('partyId')
+    guests = playlists[party_id]['guests']
+    return json.dumps({'userCount': len(guests)})
+
+### Todo get each user's info
 
 @app.route('/join_party/<party_id>')
 def join_party(party_id):
