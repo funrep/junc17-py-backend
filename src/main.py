@@ -215,8 +215,8 @@ def play(party_id):
         # return 'Success'
         return playlists[party_id]['pl_id'] 
 
-@app.route('/mood')
-def set_mood(party_id, level):
+@app.route('/mood', methods=['GET', 'POST'])
+def set_mood():
         token = request.args.get('token')
         party_id = request.args.get('partyId')
         moodLevel = request.args.get('mood')
