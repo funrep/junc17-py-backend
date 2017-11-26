@@ -20,8 +20,8 @@ clf = joblib.load('src/model.pkl')
 
 appname = 'Partify'
 
-client_id = 'a9b4c32e2d98436fbf23777eafc3a300'
-client_secret = 'e5c0394b9d0c4dfbb2f4c787fbf6fd1b'
+client_id = os.environ['SPOTIPY_CLIENT_ID']
+client_secret = os.environ['SPOTIFY_CLIENT_SECRET']
 redirect_uri = 'http://127.0.0.1:5000/admin/callback'
 scope = 'user-read-private user-top-read playlist-modify-private user-modify-playback-state'
 
