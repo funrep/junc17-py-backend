@@ -42,6 +42,8 @@ db = {}
 
 
 def mod_playlist(party_id, user_id, pl_id, token, mood):
+
+        sp = spotipy.Spotify(auth=token)
         # remove tracks
         data = sp.user_playlist(user=user_id, playlist_id=pl_id)
         track_ids = []
